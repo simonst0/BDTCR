@@ -7,3 +7,4 @@ Third party code: RapidXML, TMXReader. Libraries: SFML, TGUI and Box2D.
 Assets by Kenney.nl 
 Portfolio: https://portfolio.multimediatechnology.at/projects/2016-brain-damaged-toy-car-rally
 Environment variables : BOX2DROOT, TGUIROOT and SFMLROOT need to be set to compile
+We used playstation controllers to test, therefore we can not guarantee other controllers will work.
