@@ -1,0 +1,4 @@
+Button {
+    NormalImage     : "blue_panel.png" Part(0, 0, 100, 100) Middle(7, 0, 85, 100);
+    TextColorNormal : rgb(255, 255, 255);
+}

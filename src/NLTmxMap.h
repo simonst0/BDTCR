@@ -1,0 +1,117 @@
+//////////////////////////////////////////////////////
+// Game Development			- Assignment 2			//
+// Simon Steiner			- 1510601034, fhs38598	//
+// Katrin-Anna Zibuschka	- 1510601044, fhs38708	//
+//////////////////////////////////////////////////////
+
+#pragma once
+
+// TMX map file parser from https://github.com/catnapgames/TestNLTmxMap
+// modification: getTilesetForGrid added (WL)
+
+#include <string>
+#include <vector>
+
+using namespace std;
+
+
+
+class NLTmxMapTileset {
+public:
+    int firstGid;
+    string name;
+    int tileWidth;
+    int tileHeight;
+    string filename;
+};
+
+
+class NLTmxMapLayer {
+public:
+    string name;
+    int width;
+    int height;
+    int* data;
+    
+    ~NLTmxMapLayer() {
+        delete [] data;
+    }
+};
+
+
+struct NLTmxMapObjectProperty {
+    string name;
+    string value;
+};
+
+
+class NLTmxMapObject {
+public:
+    string name;
+	string type;
+    int gid;
+    int x;
+    int y;
+    int width;
+    int height;
+	float scale;
+    vector<NLTmxMapObjectProperty*> properties;
+    
+public:
+    
+    ~NLTmxMapObject() {
+        for ( auto property : properties ) {
+            delete property;
+        }
+    }
+};
+
+
+class NLTmxMapObjectGroup {
+public:
+    string name;
+    int width;
+    int height;
+    bool visible;
+    vector<NLTmxMapObject*> objects;
+    
+    ~NLTmxMapObjectGroup() {
+        for ( auto o : objects ) {
+            delete o;
+        }
+    }
+};
+
+
+class NLTmxMap {
+public:
+    
+    int width;
+    int height;
+    int tileWidth;
+    int tileHeight;
+    
+    vector<NLTmxMapTileset*> tilesets;
+    vector<NLTmxMapLayer*> layers;
+    vector<NLTmxMapObjectGroup*> groups;
+    
+    ~NLTmxMap() {
+        for ( auto g : groups ) {
+            delete g;
+        }
+        
+        for ( auto l : layers ) {
+            delete l;
+        }
+        
+        for ( auto ts : tilesets ) {
+            delete ts;
+        }
+    }
+    
+	NLTmxMapTileset* getTilesetForGrid(int grid);
+};
+
+
+NLTmxMap* NLLoadTmxMap( char *xml );
+

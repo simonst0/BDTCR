@@ -6,3 +6,4 @@ Copyright by University of Applied Sciences Salzburg, MultiMedia Technology and 
 Third party code: RapidXML, TMXReader. Libraries: SFML, TGUI and Box2D. 
 Assets by Kenney.nl 
 Portfolio: https://portfolio.multimediatechnology.at/projects/2016-brain-damaged-toy-car-rally
+Environment variables : BOX2DROOT, TGUIROOT and SFMLROOT need to be set to compile

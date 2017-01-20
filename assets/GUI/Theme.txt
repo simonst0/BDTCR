@@ -1,0 +1,12 @@
+Button {
+    NormalImage     : "blue_button03.png" Part(0, 0, 190, 45) Middle(6, 0, 177, 45);
+    HoverImage      : "blue_button03_light.png" Part(0, 0, 190, 45) Middle(6, 0, 177, 45);
+    DownImage       : "blue_button03_light.png" Part(0, 0, 190, 45) Middle(6, 0, 177, 45);
+    TextColorNormal : rgb(255, 255, 255);
+    TextColorHover  : rgb(255, 255, 255);
+    TextColorDown   : rgb(255, 255, 255);
+}
+
+Label {
+    TextColor : rgb(255, 255, 255);
+}
