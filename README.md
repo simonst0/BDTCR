@@ -9,3 +9,4 @@ Portfolio: https://portfolio.multimediatechnology.at/projects/2016-brain-damaged
 Environment variables : BOX2DROOT, TGUIROOT and SFMLROOT need to be set to compile.
 We used playstation controllers to test, therefore we can not guarantee other gamepads will work. We plan on implementing XInput to allow effects like rumble to simulate engine movement. Be excited :D
 The game is currently missing sound, but we will add it until February. 
+You will need at least two Gamepads to play.
