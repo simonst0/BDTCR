@@ -81,11 +81,11 @@ float ViewManager::GetZoom(sf::Vector2f middle)
 	for (auto body : m_registeredBodies)
 	{
 		auto actPos = body->GetPosition();
-		actPos.x *= 100;
-		actPos.y *= 100;
+		actPos.x *= 90;
+		actPos.y *= 110;
 		auto midToPos = mid - actPos;
 		float actRadius = midToPos.Length();
 		radius = std::max<float>(actRadius, radius);
 	}
-	return 0.1 + radius / 400;
+	return (radius / 1250)*(radius / 1250) + 0.05f;
 }

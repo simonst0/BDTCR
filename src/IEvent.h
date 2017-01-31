@@ -43,10 +43,12 @@ public:
 class PlayerDeathEvent : public IEvent
 {
 public:
-	PlayerDeathEvent(std::string gameObjectID) 
+	PlayerDeathEvent(std::string gameObjectID, int playerID) 
 		: IEvent(EventIDs::PlayerDeath)
-		, m_playerID(gameObjectID)
+		, m_gameObjectID(gameObjectID)
+		, m_playerID(playerID)
 	{}
 
-	std::string m_playerID;
+	std::string m_gameObjectID;
+	int m_playerID;
 };

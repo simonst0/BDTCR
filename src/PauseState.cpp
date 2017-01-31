@@ -6,6 +6,7 @@
 
 #include "stdafx.h"
 #include "PauseState.h"
+#include "AudioManager.h"
 
 template <typename T, unsigned S>
 unsigned arraysize(const T(&v)[S]) { return S; }
@@ -13,6 +14,12 @@ unsigned arraysize(const T(&v)[S]) { return S; }
 PauseState::PauseState(GameStateManager* gameStateManager, Game* game, std::string id) : GameState(gameStateManager, game, id)
 {
 	InitButtons();
+}
+
+
+PauseState::~PauseState()
+{
+	m_buttons.clear();
 }
 
 void PauseState::VInit() 
@@ -23,6 +30,7 @@ void PauseState::VInit()
 	m_focusedButton = 0;
 	SetButtonFocus();
 	BindInput();
+	AudioManager::GetInstance().PauseAll();
 	
 	Game::GUI.add(m_panel);
 	m_isInit = true;
@@ -33,15 +41,17 @@ void PauseState::VUpdate(float deltaTime) {
 	if (m_inputManager.IsButtonPressed(StaticStrings::Select, false))
 	{
 		auto text = m_buttons[m_focusedButton]->getText().toAnsiString();
-		if (text == buttonTexts[0])
+		if (text == m_buttonTexts[0])
 		{
 			m_gameStateManager->SetState(StaticStrings::StateMain);
+			AudioManager::GetInstance().RestartAllPaused();
 			return;
 		}
 
-		if (text == buttonTexts[1])
+		if (text == m_buttonTexts[1])
 		{
 			m_gameStateManager->SetState(StaticStrings::StateMenu);
+			AudioManager::GetInstance().StopAll();
 			return;
 		}
 	}
@@ -50,7 +60,7 @@ void PauseState::VUpdate(float deltaTime) {
 	{
 		m_focusedButton++;
 		m_focusedButton %= m_buttonCount;
-
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MenuTick);
 		SetButtonFocus();
 	}
 	else if (m_inputManager.IsButtonPressed(StaticStrings::Up, false))
@@ -59,7 +69,7 @@ void PauseState::VUpdate(float deltaTime) {
 			m_focusedButton = m_buttonCount;
 		m_focusedButton--;
 		m_focusedButton %= m_buttonCount;
-
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MenuTick);
 		SetButtonFocus();
 	}
 }
@@ -105,7 +115,7 @@ void PauseState::InitButtons()
 
 #pragma region create buttons
 
-	continueButton->setText(buttonTexts[0]);
+	continueButton->setText(m_buttonTexts[0]);
 	continueButton->setPosition(tgui::bindWidth(m_panel) / 2 - tgui::bindWidth(continueButton) / 2, tgui::bindHeight(m_panel) / 2 - tgui::bindHeight(continueButton) - 0.5f * yPadding);
 	continueButton->connect("SizeChanged", [&](tgui::Button::Ptr button, tgui::Layout2d focusedButtonSize)
 	{
@@ -118,7 +128,7 @@ void PauseState::InitButtons()
 		, m_focusedButtonSize);
 	m_buttons[0] = continueButton;
 	
-	menuButton->setText(buttonTexts[1]);
+	menuButton->setText(m_buttonTexts[1]);
 	menuButton->setPosition(tgui::bindWidth(m_panel) / 2 - tgui::bindWidth(menuButton) / 2, tgui::bindHeight(m_panel) / 2 + 0.5f * yPadding);
 	menuButton->connect("SizeChanged", [&](tgui::Button::Ptr button, tgui::Layout2d focusedButtonSize)
 	{

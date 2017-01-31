@@ -10,6 +10,7 @@
 #include "GameObject.h"
 #include "Player.h"
 #include "ScoreComponent.h"
+#include "HealthComponent.h"
 
 class GameObjectManager
 {
@@ -30,11 +31,17 @@ public:
 	void IncreaseMultipleNameCounter(string name);
 
 	void AddPlayer(int gamepadID);
-	void AddPlayerScore(int gamepadID, ScoreComponent* score);
+	void AddPlayerScore(int gamepadID, std::unique_ptr<ScoreComponent> score);
+	void AddPlayerHealth(int gamepadID, std::unique_ptr<HealthComponent> health);
 	void RemovePlayer(int gamepadID);
 	void RemoveAllPlayers();
+	void PlayerDies(int gamepadID);
+	void Reset(int gamepadID);
+	HealthComponent* GetPlayerHealth(int gamepadID);
 	ScoreComponent* GetPlayerScore(int gamepadID);
+	std::vector<HealthComponent*> GetPlayerHealths();
 	std::map<std::string, int> GetPlayerScores();
+	Player* GetPlayerByID(int playerID) { return m_players[playerID].get(); }
 
 private:
 	GameObjectManager()
@@ -42,6 +49,8 @@ private:
 		, m_startingPositions()
 	{}
 	~GameObjectManager() = default;
+
+	bool PlayerExists(int gamepadID);
 
 	void RemoveGameObject(std::string id);
 	void UnbindManagers(std::string id);

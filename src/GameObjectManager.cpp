@@ -71,32 +71,41 @@ void GameObjectManager::Update(float deltaTime)
 			gameObject.second->Update(deltaTime);
 	}
 
+	auto IDs = GetRegisteredPlayerIDs();
+
+	for (auto it = IDs.begin(); it != IDs.end(); it++) {
+		m_players[*it]->Update(deltaTime);
+	}
+
 	for (auto& id : removeList)
 	{
 		RemoveGameObject(id);
 	}
 }
 
-void GameObjectManager::AddPlayer(int gamepadID) {	
-	if (gamepadID < 0 || gamepadID >= Game::PLAYER_COUNT)
-		return;
-
-	if (m_players[gamepadID] != nullptr)
+void GameObjectManager::AddPlayer(int gamepadID) 
+{	
+	if (gamepadID < 0 || gamepadID >= Game::PLAYER_COUNT || m_players[gamepadID] != nullptr)
 		return;
 
 	m_players[gamepadID] = make_unique<Player>(gamepadID);
 	sf::err() << "Gamepad " << gamepadID << " registered" << std::endl;
 }
 
-void GameObjectManager::AddPlayerScore(int gamepadID, ScoreComponent* score)
+void GameObjectManager::AddPlayerScore(int gamepadID, std::unique_ptr<ScoreComponent> score)
 {
-	if (gamepadID < 0 || gamepadID >= Game::PLAYER_COUNT)
+	if (!PlayerExists(gamepadID))
 		return;
 
-	if (m_players[gamepadID] == nullptr)
+	m_players[gamepadID]->AddScore(move(score));
+}
+
+void GameObjectManager::AddPlayerHealth(int gamepadID, std::unique_ptr<HealthComponent> health)
+{
+	if (!PlayerExists(gamepadID))
 		return;
 
-	m_players[gamepadID]->AddScore(score);
+	m_players[gamepadID]->AddHealth(move(health));
 }
 
 std::map<std::string, int> GameObjectManager::GetPlayerScores()
@@ -110,6 +119,19 @@ std::map<std::string, int> GameObjectManager::GetPlayerScores()
 	return scores;
 }
 
+std::vector<HealthComponent*> GameObjectManager::GetPlayerHealths()
+{
+	std::vector<HealthComponent*> healths;
+
+	for (auto id : GetRegisteredPlayerIDs())
+	{
+		if(m_players[id]->IsAlive())
+			healths.push_back(m_players[id]->GetHealthComponent());
+	}
+
+	return healths;
+}
+
 void GameObjectManager::RemovePlayer(int gamepadID) {
 	if (gamepadID < 0 || gamepadID >= Game::PLAYER_COUNT)
 		return;
@@ -118,7 +140,8 @@ void GameObjectManager::RemovePlayer(int gamepadID) {
 	sf::err() << "Gamepad " << gamepadID << " deregistered" << std::endl;
 }
 
-void GameObjectManager::RemoveAllPlayers() {
+void GameObjectManager::RemoveAllPlayers() 
+{
 	auto IDs = GetRegisteredPlayerIDs();
 
 	for (auto it = IDs.begin(); it != IDs.end(); it++) {
@@ -126,12 +149,32 @@ void GameObjectManager::RemoveAllPlayers() {
 	}
 }
 
-ScoreComponent* GameObjectManager::GetPlayerScore(int gamepadID)
+void GameObjectManager::PlayerDies(int gamepadID)
 {
-	if (gamepadID < 0 || gamepadID >= Game::PLAYER_COUNT)
+	if (!PlayerExists(gamepadID))
+		return;
+
+	m_players[gamepadID]->Die();
+}
+
+void GameObjectManager::Reset(int gamepadID)
+{
+	if (!PlayerExists(gamepadID))
+		return;
+	m_players[gamepadID]->Reset();
+}
+
+HealthComponent* GameObjectManager::GetPlayerHealth(int gamepadID)
+{
+	if (!PlayerExists(gamepadID))
 		return nullptr;
 
-	if (m_players[gamepadID] == nullptr)
+	return m_players[gamepadID]->GetHealthComponent();
+}
+
+ScoreComponent* GameObjectManager::GetPlayerScore(int gamepadID)
+{
+	if (!PlayerExists(gamepadID))
 		return nullptr;
 
 	return m_players[gamepadID]->GetScoreComponent();
@@ -167,6 +210,12 @@ void GameObjectManager::Clear()
 
 	m_gameObjects.clear();
 	m_startingPositions.clear();
+
+	auto IDs = GetRegisteredPlayerIDs();
+
+	for (auto it = IDs.begin(); it != IDs.end(); it++) {
+		m_players[*it]->DeactivateGUI();
+	}
 }
 
 void GameObjectManager::UnbindManagers(std::string id) {
@@ -186,5 +235,10 @@ void GameObjectManager::IncreaseMultipleNameCounter(std::string name)
 	if (m_multipleNameCounter.count(name) == 0)
 		m_multipleNameCounter[name] = 0;
 	m_multipleNameCounter[name]++;
+}
+
+bool GameObjectManager::PlayerExists(int gamepadID)
+{
+	return !(gamepadID < 0 || gamepadID >= Game::PLAYER_COUNT || m_players[gamepadID] == nullptr);
 }
 

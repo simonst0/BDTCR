@@ -64,7 +64,7 @@ sf::Transform Box2DPhysicsManager::GetTransformById(std::string id, sf::Transfor
 	auto p = transform.p;
 	auto q = transform.q;
 	//Translation * Rotation (* Vector)
-	return spriteTransform.translate(sf::Vector2f(p.x*100, p.y*100)).rotate(q.GetAngle()*57.2958f);
+	return sf::Transform().translate(sf::Vector2f(p.x*100, p.y*100)) * sf::Transform().rotate(q.GetAngle()*57.2958f);
 }
 b2Vec2 Box2DPhysicsManager::GetVelocityById(std::string id)
 {

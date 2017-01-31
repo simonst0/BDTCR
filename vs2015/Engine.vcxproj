@@ -102,6 +102,7 @@
     <ClInclude Include="../src/MenuState.h" />
     <ClInclude Include="../src/Game.h" />
     <ClInclude Include="../src/GameObject.h" />
+    <ClInclude Include="..\src\AudioManager.h" />
     <ClInclude Include="..\src\BoosterComponent.h" />
     <ClInclude Include="..\src\Box2DContactListener.h" />
     <ClInclude Include="..\src\Box2DPhysicsManager.h" />
@@ -147,6 +148,7 @@
     <ClCompile Include="../src/GameObject.cpp" />
     <ClCompile Include="../src/GameStateManager.cpp" />
     <ClCompile Include="../src/InputManager.cpp" />
+    <ClCompile Include="..\src\AudioManager.cpp" />
     <ClCompile Include="..\src\BoosterComponent.cpp" />
     <ClCompile Include="..\src\Box2DContactListener.cpp" />
     <ClCompile Include="..\src\Box2DPhysicsManager.cpp" />

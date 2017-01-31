@@ -28,6 +28,8 @@ public:
 	virtual bool VInit() override;
 	virtual void VUpdate(float fDeltaTime) override {}
 	virtual void VDraw() override;
+
+	void SetText(std::string &text) { m_textString = text; }
 	
 private:
 	sf::Text m_text;

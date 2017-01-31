@@ -16,9 +16,9 @@
 #include "InputManager.h"
 #include "GameObjectManager.h"
 #include "NLTmxMap.h"
-#include "HealthComponent.h"
+#include "TGUI\TGUI.hpp"
 
-class MainState : public GameState
+class MainState : public GameState, public IObserver
 {
 public:
 	using GameState::GameState;
@@ -31,11 +31,18 @@ public:
 	virtual void VInit() override;
 	virtual void VExit() override;
 	virtual void VUpdate(float delta) override;
+	void notify(IEvent* e);
 
 private:
 	void LoadTMXInput(const std::string& filename);
 	void LoadGameObjectFromTMX(NLTmxMapObject* object, std::vector<int> registeredPlayers);
-	void AddPlayerLogic(GameObject* gameObject);
+
+	void StartCountdown();
+	void StopCountdown();
+	bool m_countdownIsRunning = false;
+	float m_countdownDeltaTime;
+	int m_countdownDigit;
+	tgui::Label::Ptr m_countdownLabel;
 	
 	void BindInput() override;
 	void UnbindInput() override;
@@ -44,7 +51,6 @@ private:
 	void ResetCamera();
 
 	std::vector<Box2DRigidBodyComponent*> m_rigidBodies;
-	std::vector<HealthComponent*> m_healths;
 	int m_environmentCounter;
 	int m_deathCounter;
 

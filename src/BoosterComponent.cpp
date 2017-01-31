@@ -18,33 +18,29 @@ void BoosterComponent::VUpdate(float fDeltaTime)
 }
 void BoosterComponent::notify(IEvent* e)
 {
-	try
+	if (e->ID == EventIDs::CollisionStart)
 	{
-		if (e->ID == EventIDs::CollisionStart)
-		{
-			CollisionStartEvent* c = static_cast<CollisionStartEvent*>(e);
+		CollisionStartEvent* c = static_cast<CollisionStartEvent*>(e);
 
-			if (c->m_bodyId1 == m_id || c->m_bodyId2 == m_id)
+		if (c->m_bodyId1 == m_id || c->m_bodyId2 == m_id)
+		{
+
+			vector<string> ids = { c->m_bodyId1, c->m_bodyId2 };
+			if (Util::AnyIDContainsString(ids, "Player") && Util::AnyIDContainsString(ids, "Arrow"))
 			{
-				if ((c->m_bodyId1.find("Player") != string::npos || c->m_bodyId2.find("Player") != string::npos)
-					&& (c->m_bodyId1.find("ArrowWhiteDown") != string::npos || c->m_bodyId2.find("ArrowWhiteDown") != string::npos))
-				{
-					std::string arrowId;
-					if (c->m_bodyId1.find("ArrowWhiteDown") != string::npos)
-						arrowId = c->m_bodyId1;
-					else
-						arrowId = c->m_bodyId2;
-					float arrowDirection = Box2DPhysicsManager::GetInstance().GetAngleById(arrowId);
-					b2Vec2 force;
-					force.x = cos(arrowDirection + deg90) / 6;
-					force.y = sin(arrowDirection + deg90) / 6;
-					Box2DPhysicsManager::GetInstance().ApplyForce(m_id, force);
-				}
+				std::string arrowId, playerId;
+				if (Util::StringContainsString(c->m_bodyId1, "Arrow"))
+					arrowId = c->m_bodyId1;
+				else
+					arrowId = c->m_bodyId2;
+				float arrowDirection = Box2DPhysicsManager::GetInstance().GetAngleById(arrowId);
+				b2Vec2 impulse;
+				impulse.x = cos(arrowDirection + deg90*3);
+				impulse.y = sin(arrowDirection + deg90*3);
+				impulse.Normalize();
+				impulse *= 0.0015;
+				Box2DPhysicsManager::GetInstance().ApplyImpulse(m_id, impulse);
 			}
 		}
-	}
-	catch (const std::bad_cast&)
-	{
-		return;
 	}
 }

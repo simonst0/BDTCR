@@ -28,6 +28,38 @@ namespace Util
 		vec.x = ((int)vec.x / quantization)*quantization;
 		vec.y = ((int)vec.y / quantization)*quantization;
 	}
+
+	static bool StringContainsString(string referenceString, string wantedString)
+	{
+		return referenceString.find(wantedString) != string::npos;
+	}
+
+
+	static bool AllIDsContainString(vector<string> ids, string wantedString)
+	{
+		for (auto s : ids)
+		{
+			if (!StringContainsString(s, wantedString))
+				return false;
+		}
+		return true;
+	}
+
+	static bool AnyIDContainsString(vector<string> ids, string wantedString)
+	{
+		for (auto s : ids)
+		{
+			if (StringContainsString(s, wantedString))
+				return true;
+		}
+		return false;
+	}
+
+	static bool AnyIdIsTriggerObject(vector<string> ids) {
+		return AnyIDContainsString(ids, "Goal")
+			|| AnyIDContainsString(ids, "Checkpoint")
+			|| AnyIDContainsString(ids, "Arrow");
+	}
 }
 
 enum class GamepadButtons {
@@ -74,15 +106,19 @@ public:
 	static const string Break;
 	static const string Down;
 	static const string Up;
+	static const string Honk;
 
 	static const string ResourcePath;
 	static const string ResourcePathBrains;
 	static const string ResourcePathFonts;
 	static const string ResourcePathGui;
 
+	static const string LogoFH;
+	static const string LogoMMT;
+
 	static const string TitleFont;
 	static const string TextFont;
-	static const string TextFontThin;
+	//static const string TextFontThin;
 	static const string GuiTheme;
 	static const string GuiThemeBlue;
 	static const string GuiThemeRed;
@@ -94,6 +130,20 @@ public:
 	static const string MenuStartGame;
 	static const string MenuQuitGame;
 	static const string MenuCredits;
+
+	static const string AudioPath;
+	static const string MenuMusic;
+	static const string MainMusic;
+	static const string MainCrash;
+	static const string MainHorn;
+	static const string MainIgnition;
+	static const string MainBarrelBump;
+	static const string MainConeBump;
+	static const string MainTireBump;
+	static const string MenuTick;
+	static const string MainCarHit;
+	static const string MainCountdown;
+	static const string MainMetallGrind;
 };
 
 static class ZombieColors {
@@ -105,3 +155,4 @@ public:
 
 	static sf::Color Colors[4];
 };
+

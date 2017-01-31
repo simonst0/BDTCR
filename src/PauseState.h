@@ -17,6 +17,7 @@ public:
 	using GameState::GameState;
 
 	PauseState(GameStateManager* gameStateManager, Game* game, std::string id);
+	~PauseState();
 
 	virtual void VInit() override;
 	virtual void VUpdate(float delta) override;
@@ -35,7 +36,7 @@ private:
 	tgui::Layout2d m_focusedButtonSize;
 	std::map<int, tgui::Button::Ptr> m_buttons;
 	int m_focusedButton;
-	const std::string buttonTexts[2] = { "continue game", "back to menu" };
+	const std::string m_buttonTexts[2] = { "continue game", "back to menu" };
 	const int m_buttonCount = 2;
 
 	tgui::Panel::Ptr m_panel;

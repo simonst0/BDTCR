@@ -16,13 +16,14 @@
 #include "PauseState.h"
 #include "Box2DPhysicsManager.h"
 #include "ViewManager.h"
+#include "AudioManager.h"
 
 using namespace std;
 using namespace sf;
 	
 tgui::Gui Game::GUI;
-
 bool Game::m_shouldBeClosed = false;
+int Game::ROUND_COUNT = 0;
 
 void Game::Run()
 {
@@ -52,9 +53,11 @@ bool Game::init()
 {
 	m_window.create(sf::VideoMode(m_Config.resolution.x, m_Config.resolution.y),
 		m_Config.windowName, sf::Style::None);
+	m_window.setFramerateLimit(60);
 
 	GUI.setWindow(m_window);
 	ViewManager::GetInstance().Init(&m_window);
+	AudioManager::GetInstance().Init();
 	//
 	m_gameStateManager.RegisterState(StaticStrings::StateMenu, make_unique<MenuState>(&m_gameStateManager, this, StaticStrings::StateMenu));
 	m_gameStateManager.RegisterState(StaticStrings::StateRegistration, make_unique<RegistrationState>(&m_gameStateManager, this, StaticStrings::StateRegistration));
@@ -80,7 +83,9 @@ void Game::update()
 	// must be first call
 	InputManager::getInstance().Update();
 	ViewManager::GetInstance().Update(fDeltaTimeSeconds);
+	auto audioManager = AudioManager::GetInstance();
 	m_gameStateManager.Update(fDeltaTimeSeconds);
+	audioManager.Update(fDeltaTimeSeconds);
 }
 
 void Game::draw()
@@ -98,6 +103,7 @@ void Game::draw()
 void Game::shutdown()
 {
 	m_gameStateManager.ShutdownStates();
+	AudioManager::GetInstance().ClearAudio();
 }
 
 void Game::QuitGame() 

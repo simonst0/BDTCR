@@ -20,6 +20,7 @@ public:
 	using GameState::GameState;
 
 	MenuState(GameStateManager* gameStateManager, Game* game, std::string id);
+	~MenuState();
 
 	virtual void VInit() override;	
 	virtual void VUpdate(float delta) override;

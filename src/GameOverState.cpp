@@ -16,15 +16,31 @@
 
 #include "GameObject.h"
 #include "TextComponent.h"
+#include "AudioManager.h"
 
 using namespace std;
 using namespace sf;
+
+template <typename T, unsigned S>
+unsigned arraysize(const T(&v)[S]) { return S; }
+
+GameOverState::GameOverState(GameStateManager* gameStateManager, Game* game, std::string id) : GameState(gameStateManager, game, id)
+{
+	InitButtons();
+}
+
+GameOverState::~GameOverState()
+{
+	m_buttons.clear();
+}
 
 void GameOverState::VInit()
 {
 	if (m_isInit)
 		return;
-	
+
+	AudioManager::GetInstance().stopAudioById(StaticStrings::MainMusic);
+
 	auto position = m_game->getWindow().getView().getCenter();
 
 	auto text = make_unique<GameObject>("GameOverTitle");
@@ -32,9 +48,8 @@ void GameOverState::VInit()
 		m_game->getWindow(), 
 		StaticStrings::ResourcePathFonts + StaticStrings::TitleFont, 
 		"GAME OVER",
-		Vector2f(position.x, position.y - 70),
-		55);
-
+		Vector2f(position.x, position.y - 250),
+		85);
 	RenderManager::getInstance().Bind(text->GetId(), 0, renderComp.get());
 
 	text->AddComponent(move(renderComp));
@@ -55,7 +70,7 @@ void GameOverState::VInit()
 		m_game->getWindow(),
 		StaticStrings::ResourcePathFonts + StaticStrings::TextFont,
 		scoreText,
-		Vector2f(position.x, position.y + 70),
+		Vector2f(position.x, position.y - 100),
 		35);
 
 	RenderManager::getInstance().Bind(text->GetId(), 0, renderComp.get());
@@ -66,14 +81,101 @@ void GameOverState::VInit()
 
 	m_view = m_game->getWindow().getView();
 	BindInput();
+
+	// if the maximum rounds are reached, the game should restart from the beginning
+	// so the score is reseted and the music starts with the original pitch
+	if (Game::ROUND_COUNT == Game::MAXIMUM_ROUND_COUNT)
+		m_usedButtonTexts[0] = m_buttonNewGame;
+	else
+		m_usedButtonTexts[0] = m_buttonNextRound;
+
+	m_usedButtonTexts[1] = m_buttonMenu;
+
+	SetButtonTexts();
+	m_focusedButton = 0;
+	SetButtonFocus();
+
+	for (auto button : m_buttons)
+	{
+		Game::GUI.add(button.second);
+	}
+}
+
+void GameOverState::InitButtons()
+{
+	auto theme = make_shared<tgui::Theme>(StaticStrings::ResourcePathGui + StaticStrings::GuiTheme);
+	
+	float yPadding = 30;
+	float xPadding = 50;
+
+	m_standardButtonSize.x = tgui::bindWidth(Game::GUI) / 3;
+	m_standardButtonSize.y = tgui::bindHeight(Game::GUI) / 8;
+	m_focusedButtonSize = m_standardButtonSize*1.05f;
+	
+	for (int i = 0; i < arraysize(m_usedButtonTexts); i++)
+	{
+		tgui::Button::Ptr button = theme->load(StaticStrings::GuiButton);
+		//button->setText(m_usedButtonTexts[i]);
+		button->setFont(StaticStrings::ResourcePathFonts + StaticStrings::TextFont);
+		button->setTextSize(55);
+		button->connect("SizeChanged", [&](tgui::Button::Ptr button, tgui::Layout2d focusedButtonSize)
+		{
+			if (button->getSize() == focusedButtonSize.getValue())
+				button->setOpacity(1.0f);
+			else
+				button->setOpacity(0.75f);
+		}
+			, button
+			, m_focusedButtonSize); 
+		button->setPosition(tgui::bindWidth(Game::GUI) / 2 - tgui::bindWidth(button) / 2, tgui::bindHeight(Game::GUI) * 3 / 5 + i * tgui::bindHeight(button) + i * yPadding);
+		m_buttons[i] = button;
+	}
+
+	m_focusedButton = 0;
+	SetButtonFocus();
 }
 
 void GameOverState::VUpdate(float delta)
 {
 	m_game->getWindow().setView(m_view);
 
-	if (m_inputManager.IsButtonPressed(StaticStrings::Start, false))
-		m_gameStateManager->SetState(StaticStrings::StateMenu);
+	if (m_inputManager.IsButtonPressed(StaticStrings::Select, false))
+	{
+		auto text = m_buttons[m_focusedButton]->getText().toAnsiString();
+		if (text == m_usedButtonTexts[0])
+		{
+			if (Game::ROUND_COUNT == Game::MAXIMUM_ROUND_COUNT)
+				Game::ROUND_COUNT = 0;
+			else
+				Game::ROUND_COUNT++;
+
+			m_gameStateManager->SetState(StaticStrings::StateMain);
+			return;
+		}
+
+		if (text == m_usedButtonTexts[1])
+		{
+			m_gameStateManager->SetState(StaticStrings::StateMenu);
+			return;
+		}
+	}
+
+	if (m_inputManager.IsButtonPressed(StaticStrings::Down, false))
+	{
+		m_focusedButton++;
+		m_focusedButton %= m_buttons.size();
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MenuTick);
+		SetButtonFocus();
+	}
+	else if (m_inputManager.IsButtonPressed(StaticStrings::Up, false))
+	{
+		if (m_focusedButton == 0)
+			m_focusedButton = m_buttons.size();
+		m_focusedButton--;
+		m_focusedButton %= m_buttons.size();
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MenuTick);
+		SetButtonFocus();
+	}
 }
 
 void GameOverState::VExit()
@@ -87,14 +189,42 @@ void GameOverState::VExit()
 	UnbindInput();
 
 	m_isInit = false;
+	
+	for (auto button : m_buttons)
+	{
+		Game::GUI.remove(button.second);
+	}
 }
 
 void GameOverState::BindInput()
 {
-	m_inputManager.Bind(StaticStrings::Start, GamepadButtons::X);
+	m_inputManager.Bind(StaticStrings::Down, GamepadButtons::R2);
+	m_inputManager.Bind(StaticStrings::Up, GamepadButtons::L2);
+	m_inputManager.Bind(StaticStrings::Select, GamepadButtons::X);
 }
 
 void GameOverState::UnbindInput()
 {
-	m_inputManager.Unbind(StaticStrings::Start);
+	m_inputManager.Unbind(StaticStrings::Down);
+	m_inputManager.Unbind(StaticStrings::Up);
+	m_inputManager.Unbind(StaticStrings::Select);
+}
+
+void GameOverState::SetButtonTexts()
+{
+	for (int i = 0; i < m_buttons.size(); i++)
+	{
+		m_buttons[i]->setText(m_usedButtonTexts[i]);
+	}
+}
+
+void GameOverState::SetButtonFocus()
+{
+	for (int i = 0; i < m_buttons.size(); i++) 
+	{
+		if (i == m_focusedButton)
+			m_buttons[i]->setSize(m_focusedButtonSize);
+		else
+			m_buttons[i]->setSize(m_standardButtonSize);
+	}
 }

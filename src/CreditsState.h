@@ -25,10 +25,11 @@ private:
 	void UnbindInput() override;
 
 	void InitText(std::string id, std::string text, std::string font, sf::Vector2f position, int size = 30, sf::Color color = sf::Color::White);
+	void InitLogo(std::string id, std::string path, sf::Vector2f position, float scale);
 
 	InputManager& m_inputManager = InputManager::getInstance();
 
-	std::vector<std::unique_ptr<GameObject>> m_texts;
+	std::vector<std::unique_ptr<GameObject>> m_items;
 
 	bool m_isInit;
 };

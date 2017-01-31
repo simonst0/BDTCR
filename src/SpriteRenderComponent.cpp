@@ -60,7 +60,7 @@ void SpriteRenderComponent::notify(IEvent* e) {
 			PlayerDeathEvent* c = static_cast<PlayerDeathEvent*>(e);
 
 			std::string gameObjectID = m_gameObject.GetId();
-			if (c->m_playerID == gameObjectID)
+			if (c->m_gameObjectID == gameObjectID)
 			{
 				int id = gameObjectID.back() - '0' - 1;
 				m_sprite.setColor(ZombieColors::Colors[id]);

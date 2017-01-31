@@ -97,6 +97,9 @@
     <ClCompile Include="..\src\BoosterComponent.cpp">
       <Filter>source\GameObjects</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\AudioManager.cpp">
+      <Filter>source\Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Debug.h">
@@ -227,6 +230,9 @@
     </ClInclude>
     <ClInclude Include="..\src\BoosterComponent.h">
       <Filter>header\GameObjects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\AudioManager.h">
+      <Filter>header\Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

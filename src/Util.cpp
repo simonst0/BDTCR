@@ -30,15 +30,21 @@ const string StaticStrings::Accelerate = "Accelerate";
 const string StaticStrings::Down = "Down";
 const string StaticStrings::Up = "Up";
 const string StaticStrings::Break = "Break";
+const string StaticStrings::Honk = "Honk";
 
 const string StaticStrings::ResourcePath = "../assets/";
 const string StaticStrings::ResourcePathBrains = "../assets/Sprites/Brains/";
 const string StaticStrings::ResourcePathFonts = "../assets/Fonts/";
 const string StaticStrings::ResourcePathGui = "../assets/GUI/";
 
-const string StaticStrings::TitleFont = "Powerweld.ttf";
-const string StaticStrings::TextFontThin = "kenvector_future_thin.ttf";
-const string StaticStrings::TextFont = "kenvector_future.ttf";
+const string StaticStrings::LogoFH = StaticStrings::ResourcePath + "Sprites/Logos/fh_logo.png";
+const string StaticStrings::LogoMMT = StaticStrings::ResourcePath + "Sprites/Logos/mmt_logo.png";
+
+//const string StaticStrings::TitleFont = "Powerweld.ttf";
+const string StaticStrings::TitleFont = "good times rg.ttf";
+//const string StaticStrings::TextFontThin = "kenvector_future_thin.ttf";
+//const string StaticStrings::TextFont = "kenvector_future.ttf";
+const string StaticStrings::TextFont = "good times rg.ttf";
 const string StaticStrings::GuiTheme = "Theme.txt";
 const string StaticStrings::GuiThemeBlue = "Theme_blue.txt";
 const string StaticStrings::GuiThemeRed = "Theme_red.txt";
@@ -50,6 +56,20 @@ const string StaticStrings::GuiLabel = "Label";
 const string StaticStrings::MenuStartGame = "Start Game";
 const string StaticStrings::MenuQuitGame = "Quit Game";
 const string StaticStrings::MenuCredits = "Credits";
+
+const string StaticStrings::AudioPath = "../assets/Audio/";
+const string StaticStrings::MenuMusic = "menuMusic";
+const string StaticStrings::MenuTick = "menuTick";
+const string StaticStrings::MainMusic = "mainMusic";
+const string StaticStrings::MainCrash = "mainCrash";
+const string StaticStrings::MainHorn = "mainHorn";
+const string StaticStrings::MainIgnition = "mainIgnition";
+const string StaticStrings::MainBarrelBump = "mainBarrelBump";
+const string StaticStrings::MainTireBump = "mainTireBump";
+const string StaticStrings::MainCarHit = "mainCarHit";
+const string StaticStrings::MainCountdown = "mainCountdown";
+const string StaticStrings::MainMetallGrind = "mainMetallGrind";
+
 
 const sf::Color ZombieColors::ZombieColorPlayer1 = sf::Color(47, 149, 208, 100);
 const sf::Color ZombieColors::ZombieColorPlayer2 = sf::Color(232, 106, 23, 100);

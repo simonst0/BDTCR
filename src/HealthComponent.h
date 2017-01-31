@@ -16,16 +16,17 @@
 class HealthComponent : public IObserver, public IComponent
 {
 public:
-	HealthComponent(GameObject& gameObject, sf::RenderWindow& renderWindow, std::string id, int playerID, float maxHealth = 100)
+	HealthComponent(GameObject& gameObject, std::string id, int playerID, float maxHealth = 100)
 		: IComponent(gameObject)
 		, m_maxHealth(maxHealth)
 		, m_id(id)
 		, m_playerID(playerID)
 		, m_currentHealth(maxHealth)
 		, m_previousHealth(maxHealth)
+		, m_hasCollided(false)
+		, m_isDead(false)
+		, m_shrinkingScale(0.95f)
 	{}
-
-	~HealthComponent();
 
 	virtual void notify(IEvent* event);
 	virtual bool VInit() override;
@@ -33,9 +34,11 @@ public:
 	bool isDestroyed() { return (m_currentHealth <= 0); }
 	std::string GetGameObjectID() { return m_id; }
 	int GetPlayerID() { return m_playerID; }
+	void Die();
+
+	void DeactivateGUI();
 
 private:
-	void Die();
 
 	std::string m_id;
 	int m_playerID;
@@ -44,11 +47,11 @@ private:
 	const float m_collisionCooldown = 1.0f;
 	float m_currentCooldown = m_collisionCooldown;
 	bool m_hasCollided = false;
-	bool m_alreadyDead = false;
-	
+	bool m_isDead = false;
+
 	float m_actScale;
 	float m_previousHealth;
-	const float m_shrinkingScale = 0.95f;
+	const float m_shrinkingScale;
 
 	bool LoadTexture(std::string path, sf::Texture& texture);
 	void ShrinkBrain();

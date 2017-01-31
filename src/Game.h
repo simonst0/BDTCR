@@ -20,7 +20,7 @@ class Game
 public:
 	struct Config
 	{
-		sf::Vector2i resolution{ 1280, 768 };
+		sf::Vector2i resolution{ 1980, 1024 };
 		std::string windowName = StaticStrings::Title;
 	};
 	
@@ -33,6 +33,8 @@ public:
 
 	static const int PLAYER_COUNT = 4;
 	static const int MINIMUM_PLAYER_COUNT = 2;
+	static const int MAXIMUM_ROUND_COUNT = 2;
+	static int ROUND_COUNT;
 	
 	static tgui::Gui GUI;
 

@@ -18,6 +18,7 @@
 
 #include "GameObject.h"
 #include "TextComponent.h"
+#include "AudioManager.h"
 
 using namespace std;
 using namespace sf;
@@ -30,10 +31,17 @@ MenuState::MenuState(GameStateManager* gameStateManager, Game* game, std::string
 	InitButtons();
 }
 
+MenuState::~MenuState()
+{
+	m_buttons.clear();
+}
+
 void MenuState::VInit()
 {
 	if (m_isInit)
 		return;
+
+	Game::ROUND_COUNT = 0;
 
 	m_gameObjectManager.RemoveAllPlayers();
 
@@ -43,7 +51,7 @@ void MenuState::VInit()
 
 	m_view = m_game->getWindow().getView();
 
-	sf::Vector2f titlePosition(m_view.getSize().x / 2, 150);
+	sf::Vector2f titlePosition(m_view.getSize().x / 2, 190);
 
 	m_title = make_unique<GameObject>("MenuText");
 	auto renderComp = make_unique<TextComponent>(*m_title,
@@ -51,7 +59,7 @@ void MenuState::VInit()
 		StaticStrings::ResourcePathFonts + StaticStrings::TitleFont,
 		StaticStrings::Title,
 		titlePosition,
-		45);
+		90);
 
 	RenderManager::getInstance().Bind(m_title->GetId(), 0, renderComp.get());
 	m_title->AddComponent(move(renderComp));
@@ -59,13 +67,15 @@ void MenuState::VInit()
 	m_isInit = m_title->Init();
 	
 	BindInput();
+
+	AudioManager::GetInstance().PlayAudioById(StaticStrings::MenuMusic);
 }
 
 void MenuState::InitButtons() {
 
 	auto theme = make_shared<tgui::Theme>(StaticStrings::ResourcePathGui + StaticStrings::GuiTheme);
 
-	string buttonTexts[] = { StaticStrings::MenuStartGame, StaticStrings::MenuQuitGame, StaticStrings::MenuCredits };
+	string buttonTexts[] = { StaticStrings::MenuStartGame, StaticStrings::MenuCredits, StaticStrings::MenuQuitGame };
 
 	m_buttonCount = arraysize(buttonTexts);
 	int yDivision = m_buttonCount + 1;
@@ -80,6 +90,7 @@ void MenuState::InitButtons() {
 		button->setText(buttonTexts[i]);
 		button->setPosition(tgui::bindWidth(Game::GUI) / 2 - tgui::bindWidth(button) / 2,
 			tgui::bindTop(Game::GUI) + tgui::bindHeight(Game::GUI) / 4 + tgui::bindHeight(Game::GUI) * (i + 1) * 3 / (yDivision * 4) - tgui::bindHeight(button) / 2);
+		button->setTextSize(60);
 		button->connect("SizeChanged", [&](tgui::Button::Ptr button, tgui::Layout2d focusedButtonSize)
 		{
 			if (button->getSize() == focusedButtonSize.getValue())
@@ -131,7 +142,7 @@ void MenuState::VUpdate(float delta)
 	{
 		m_focusedButton++;
 		m_focusedButton %= m_buttonCount;
-
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MenuTick);
 		SetButtonFocus();
 	}
 	else if(m_inputManager.IsButtonPressed(StaticStrings::Up, false)) 
@@ -140,7 +151,7 @@ void MenuState::VUpdate(float delta)
 			m_focusedButton = m_buttonCount;
 		m_focusedButton--;
 		m_focusedButton %= m_buttonCount;
-
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MenuTick);
 		SetButtonFocus();
 	}
 }

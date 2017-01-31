@@ -10,6 +10,8 @@
 #include "PlayerGamepadControlComponent.h"
 #include "InputManager.h"
 #include "Box2DPhysicsManager.h"
+#include "InputManager.h"
+#include "AudioManager.h"
 #include <math.h>
 #include <iostream>
 
@@ -60,6 +62,8 @@ PlayerGamepadControlComponent::VUpdate(float fDeltaTime)
 		velocity.y /= -1000;
 		Box2DPhysicsManager::GetInstance().ApplyForce(m_id, velocity);
 	}
+	if (InputManager::getInstance().IsButtonPressed(StaticStrings::Honk, m_gamepadIndex))
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MainHorn);
 }
 
 float PlayerGamepadControlComponent::getActAngle(float aK, float gK)
@@ -70,8 +74,7 @@ float PlayerGamepadControlComponent::getActAngle(float aK, float gK)
 }
 float PlayerGamepadControlComponent::getActForceMultiplicator()
 {
-	return 4.5 / (1000 + m_timeR2isDown);
-	//return  sin(m_timeR2isDown*2) * 1000;
+	return 6 / (1000 + m_timeR2isDown);
 }
 
 

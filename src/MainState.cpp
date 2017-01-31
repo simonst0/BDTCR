@@ -25,22 +25,32 @@
 #include "Box2DRigidBodyComponent.h"
 #include "ViewManager.h"
 #include "BoosterComponent.h"
+#include "AudioManager.h"
 #include <iostream>
-
 
 using namespace sf;
 using namespace std;
 
 void MainState::VInit()
 {
-	LoadTMXInput(StaticStrings::ResourcePath + "game.tmx");
+	auto audioManager = AudioManager::GetInstance();
+	audioManager.PlayAudioById(StaticStrings::MainMusic);
+	audioManager.changePitchById(StaticStrings::MainMusic, 1 + 0.05f * Game::ROUND_COUNT);
+	audioManager.PlayAudioById(StaticStrings::MainIgnition);
+	audioManager.PlayAudioById(StaticStrings::MainCountdown);
+
+	EventBus::GetInstance().RegisterToEvent(EventIDs::CollisionStart, this);
+	EventBus::GetInstance().RegisterToEvent(EventIDs::PlayerDeath, this);
+
+	LoadTMXInput(StaticStrings::ResourcePath + "game" + to_string(Game::ROUND_COUNT) + ".tmx");
 	
 	SetCamera();
-
 	BindInput();
 
 	m_deathCounter = 0;
 	m_environmentCounter = 0;
+
+	StartCountdown();
 }
 
 void MainState::LoadTMXInput(const string& filename) {
@@ -283,19 +293,39 @@ void MainState::LoadGameObjectFromTMX(NLTmxMapObject* object, std::vector<int> r
 		EventBus::GetInstance().RegisterToEvent(EventIDs::CollisionStart, steeringComp.get());
 		gameObject->AddComponent(move(steeringComp));
 
-		auto healthComponent = make_unique<HealthComponent>(*gameObject, this->m_game->getWindow(), object->name, InputPlayerId + 1);
-		auto health = healthComponent.get();
-		m_healths.push_back(health);
-		EventBus::GetInstance().RegisterToEvent(EventIDs::CollisionEnd, health);
-		gameObject->AddComponent(move(healthComponent));
+		// if the object has an inputComponent it automatically means, this is a player
+		// every player has to have health and score
 
-		auto scoreComponent = make_unique<ScoreComponent>(*gameObject, object->name);
-		auto score = scoreComponent.get();
-		m_gameObjectManager.AddPlayerScore(InputPlayerId, score);
+		// Health
+		if (Game::ROUND_COUNT == 0)
+		{
+			auto healthComponent = make_unique<HealthComponent>(*gameObject, object->name, InputPlayerId + 1);
+			healthComponent->VInit();
+			m_gameObjectManager.AddPlayerHealth(InputPlayerId, move(healthComponent));
+		}
+		else
+		{
+			m_gameObjectManager.Reset(InputPlayerId);
+		}
+
+		auto health = m_gameObjectManager.GetPlayerHealth(InputPlayerId);
+		EventBus::GetInstance().RegisterToEvent(EventIDs::CollisionStart, health);
+		
+		// Score
+		// if there is already a score -> use it
+		// else:
+		if (Game::ROUND_COUNT == 0)
+		{
+			unique_ptr<ScoreComponent> scoreComponent = make_unique<ScoreComponent>(*gameObject, object->name, InputPlayerId + 1);
+			scoreComponent->VInit();
+			m_gameObjectManager.AddPlayerScore(InputPlayerId, move(scoreComponent));
+		}
+		
+		auto score = m_gameObjectManager.GetPlayerScore(InputPlayerId);
 		EventBus::GetInstance().RegisterToEvent(EventIDs::CollisionStart, score);
 		EventBus::GetInstance().RegisterToEvent(EventIDs::PlayerDeath, score);
-		gameObject->AddComponent(move(scoreComponent));
 
+		// Boost
 		auto boostComponent = make_unique<BoosterComponent>(*gameObject, object->name);
 		auto boost = boostComponent.get();
 		EventBus::GetInstance().RegisterToEvent(EventIDs::CollisionStart, boost);
@@ -305,11 +335,11 @@ void MainState::LoadGameObjectFromTMX(NLTmxMapObject* object, std::vector<int> r
 	std::unique_ptr<Box2DRigidBodyComponent> body;
 	if (mass > 0)
 	{
-		body = make_unique<Box2DRigidBodyComponent>(*gameObject, object->x + object->width / 2, object->y + object->height / 2, 0, 2.0f, gameObject->GetId(), b2_dynamicBody);
+		body = make_unique<Box2DRigidBodyComponent>(*gameObject, object->x + object->width / 2, object->y + object->height / 2, object->angle* 0.0174533f, 2.0f, gameObject->GetId(), b2_dynamicBody);
 	}
 	else
 	{
-		body = make_unique<Box2DRigidBodyComponent>(*gameObject, object->x + object->width / 2, object->y + object->height / 2, 0, 0, gameObject->GetId(), b2_staticBody);
+		body = make_unique<Box2DRigidBodyComponent>(*gameObject, object->x + object->width / 2, object->y + object->height / 2, object->angle* 0.0174533f, 0, gameObject->GetId(), b2_staticBody);
 	}
 	m_rigidBodies.push_back(body.get());
 	body->AddFixture(object->width*scale, object->height*scale, mass, groupIndex, restititution, 0.5f);
@@ -328,6 +358,7 @@ void MainState::BindInput()
 		m_inputManager.Bind(StaticStrings::Pause, GamepadButtons::Options, *it);
 		m_inputManager.Bind(StaticStrings::Accelerate, GamepadButtons::R2, *it);
 		m_inputManager.Bind(StaticStrings::Break, GamepadButtons::L2, *it);
+		m_inputManager.Bind(StaticStrings::Honk, GamepadButtons::Square);
 	}
 }
 
@@ -339,6 +370,23 @@ void MainState::UnbindInput()
 
 void MainState::VUpdate(float fDeltaTime)
 {
+	if (m_countdownIsRunning)
+	{
+		m_countdownDeltaTime += fDeltaTime;
+		if (m_countdownDeltaTime >= 1)
+		{
+			m_countdownDeltaTime = 0;
+			m_countdownDigit--;
+			if (m_countdownDigit == 0)
+			{
+				StopCountdown();
+				return;
+			}
+			m_countdownLabel->setText(to_string(m_countdownDigit));
+		}
+		return;
+	}
+
 	if (InputManager::getInstance().IsButtonPressed(StaticStrings::Pause))
 	{
 		m_gameStateManager->SetState(StaticStrings::StatePause);
@@ -346,24 +394,6 @@ void MainState::VUpdate(float fDeltaTime)
 	}
 
 	int playerCounter = m_gameObjectManager.GetRegisteredPlayersCounter();
-
-	for (auto it = m_healths.begin(); it != m_healths.end();)
-	{
-		auto health = *it;
-		if (health->isDestroyed())
-		{
-			EventBus::GetInstance().Deregister(health);
-			EventBus::GetInstance().Deregister(m_gameObjectManager.GetPlayerScore(health->GetPlayerID() - 1));
-			auto gameObject = m_gameObjectManager.findObjectById(health->GetGameObjectID());
-			m_deathCounter++;
-			it = m_healths.erase(it);						
-		}
-		else
-		{
-			it++;
-		}
-	}
-
 	if (m_deathCounter == playerCounter - 1)
 	{
 		m_gameStateManager->SetState(StaticStrings::StateGameOver);
@@ -378,7 +408,6 @@ void MainState::VUpdate(float fDeltaTime)
 void MainState::VExit()
 {
 	EventBus::GetInstance().DeregisterEverything();
-	m_healths.clear();
 
 	ViewManager::GetInstance().Clear();
 
@@ -403,4 +432,62 @@ void MainState::SetCamera()
 void MainState::ResetCamera()
 {
 	m_game->getWindow().setView(m_menuCamera);
+}
+
+void MainState::StartCountdown()
+{
+	m_countdownIsRunning = true;
+	m_countdownDeltaTime = 0;
+	m_countdownDigit = 3;
+
+	m_countdownLabel = std::make_shared<tgui::Label>();
+	m_countdownLabel->setFont(StaticStrings::ResourcePathFonts + StaticStrings::TextFont);
+	m_countdownLabel->setTextColor(tgui::Color(255, 255, 255));
+	m_countdownLabel->setText(std::to_string(m_countdownDigit));
+	m_countdownLabel->setTextSize(400);
+	m_countdownLabel->setAutoSize(true);
+	m_countdownLabel->setPosition(tgui::bindWidth(Game::GUI) / 2 - tgui::bindWidth(m_countdownLabel)/2, tgui::bindHeight(Game::GUI) / 2 - tgui::bindHeight(m_countdownLabel)*2/3);
+	Game::GUI.add(m_countdownLabel);
+}
+
+void MainState::StopCountdown()
+{
+	Game::GUI.remove(m_countdownLabel);
+	m_countdownIsRunning = false;
+}
+void MainState::notify(IEvent* e)
+{
+	if (e->ID == EventIDs::CollisionStart)
+	{
+		CollisionStartEvent* c = static_cast<CollisionStartEvent*>(e);
+
+		vector<string> referenceStrings = { c->m_bodyId1, c->m_bodyId2 };
+		if (Util::AllIDsContainString(referenceStrings, "Player"))
+			AudioManager::GetInstance().PlayAudioById(StaticStrings::MainCarHit);
+		if (Util::AnyIDContainsString(referenceStrings, "Barrel"))
+			AudioManager::GetInstance().PlayAudioById(StaticStrings::MainBarrelBump);
+		if (Util::AnyIDContainsString(referenceStrings, "Tire")
+			|| Util::AnyIDContainsString(referenceStrings, "Cone"))
+			AudioManager::GetInstance().PlayAudioById(StaticStrings::MainTireBump);
+		if (Util::AnyIDContainsString(referenceStrings, "environment"))
+			AudioManager::GetInstance().PlayAudioById(StaticStrings::MainMetallGrind);
+	}
+	else if (e->ID == EventIDs::PlayerDeath)
+	{
+		AudioManager::GetInstance().PlayAudioById(StaticStrings::MainCrash);
+
+		PlayerDeathEvent* d = static_cast<PlayerDeathEvent*>(e);
+		int gamepadID = d->m_playerID - 1;
+		auto player = m_gameObjectManager.GetPlayerByID(gamepadID);
+
+		if (player == nullptr)
+			return;
+		
+		auto health = player->GetHealthComponent();
+		EventBus::GetInstance().Deregister(health);
+		EventBus::GetInstance().Deregister(m_gameObjectManager.GetPlayerScore(gamepadID));
+		auto gameObject = m_gameObjectManager.findObjectById(health->GetGameObjectID());
+		m_gameObjectManager.PlayerDies(gamepadID);
+		m_deathCounter++;
+	}
 }

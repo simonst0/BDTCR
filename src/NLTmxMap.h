@@ -8,6 +8,7 @@
 
 // TMX map file parser from https://github.com/catnapgames/TestNLTmxMap
 // modification: getTilesetForGrid added (WL)
+// modification: reading of angle added
 
 #include <string>
 #include <vector>
@@ -55,6 +56,7 @@ public:
     int width;
     int height;
 	float scale;
+	float angle;
     vector<NLTmxMapObjectProperty*> properties;
     
 public:

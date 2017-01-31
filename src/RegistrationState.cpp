@@ -18,6 +18,8 @@
 #include "GameObject.h"
 #include "TextComponent.h"
 
+#include "AudioManager.h"
+
 using namespace std;
 using namespace sf;
 
@@ -47,7 +49,8 @@ void RegistrationState::VInit()
 
 	for (int i = 0; i < m_buttons.size(); i++) {	
 		auto button = m_buttons[i];
-		button->setText(m_loginText);
+		button->setText(m_loginText);		
+		button->setOpacity(0.75f);
 		Game::GUI.add(button);
 	}
 	
@@ -75,12 +78,6 @@ void RegistrationState::VInit()
 void RegistrationState::VUpdate(float delta)
 {
 	m_game->getWindow().setView(m_view);
-	
-	if (m_inputManager.IsKeyPressed(StaticStrings::Select))
-	{
-		m_gameStateManager->SetState(StaticStrings::StateRegistration);
-		return;
-	}
 
 	auto deregisteredPlayers = m_gameObjectManager.GetDeregisteredPlayerIDs();
 	auto registeredPlayers = m_gameObjectManager.GetRegisteredPlayerIDs();
@@ -105,7 +102,8 @@ void RegistrationState::VUpdate(float delta)
 		if (m_inputManager.IsButtonPressed(StaticStrings::Register, *it))
 		{
 			m_gameObjectManager.RemovePlayer(*it);
-			m_buttons[*it]->setText("press ps\nbutton\nto join");
+			m_buttons[*it]->setText(m_loginText);
+			m_buttons[*it]->setOpacity(0.75f);
 		}
 	}
 
@@ -124,6 +122,7 @@ void RegistrationState::VUpdate(float delta)
 		{
 			m_gameObjectManager.AddPlayer(*it);
 			m_buttons[*it]->setText(m_logoutText);
+			m_buttons[*it]->setOpacity(1.0f);
 		}
 	}
 }
@@ -138,7 +137,7 @@ void RegistrationState::VExit()
 	m_description = nullptr;
 
 	UnbindInput();
-
+	AudioManager::GetInstance().StopAll();
 	m_isInit = false;
 }
 

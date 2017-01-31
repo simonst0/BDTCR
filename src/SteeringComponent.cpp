@@ -31,14 +31,13 @@ void SteeringComponent::notify(IEvent* e)
 	{
 		CollisionEndEvent* c = static_cast<CollisionEndEvent*>(e);
 
-		if ((c->m_bodyId1.find("Goal") != string::npos || c->m_bodyId2.find("Goal") != string::npos)
-			|| (c->m_bodyId1.find("Checkpoint") != string::npos || c->m_bodyId2.find("Checkpoint") != string::npos)
-			|| c->m_bodyId1.find("ArrowWhiteDown") != string::npos || c->m_bodyId2.find("ArrowWhiteDown") != string::npos)
+		vector<string> ids = { c->m_bodyId1, c->m_bodyId2 };
+		if (Util::AnyIdIsTriggerObject(ids))
 			return;
 
 		if (c->m_bodyId1 == m_id || c->m_bodyId2 == m_id)
 		{
-			if ((c->m_bodyId1.find("environment") != string::npos || c->m_bodyId2.find("environment") != string::npos))
+			if (Util::AnyIDContainsString(ids, "environment"))
 			{
 				m_timeoutActive = true;
 				m_timeout = GetTimeout();

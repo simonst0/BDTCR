@@ -134,6 +134,12 @@ NLTmxMap* NLLoadTmxMap( char *xml )
 			if (typeattr) {
 				object->type = typeattr->value();
 			}
+
+			auto rotationattr = objectnode->first_attribute("rotation");
+			if (rotationattr) {
+				object->angle = atof(rotationattr->value());
+			}
+
             object->x = atoi( objectnode->first_attribute( "x" )->value() );
             object->y = atoi( objectnode->first_attribute( "y" )->value() );
             
