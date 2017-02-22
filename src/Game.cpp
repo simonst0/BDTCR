@@ -52,7 +52,7 @@ void Game::Run()
 bool Game::init()
 {
 	m_window.create(sf::VideoMode(m_Config.resolution.x, m_Config.resolution.y),
-		m_Config.windowName, sf::Style::None);
+		m_Config.windowName, sf::Style::Fullscreen);
 	m_window.setFramerateLimit(60);
 
 	GUI.setWindow(m_window);
@@ -69,7 +69,8 @@ bool Game::init()
 	
 	m_gameStateManager.SetState(StaticStrings::StateMenu);
 
-	Box2DPhysicsManager::GetInstance().SetGame(this);	return true;
+	Box2DPhysicsManager::GetInstance().SetGame(this);	
+	return true;
 }
 
 void Game::update()

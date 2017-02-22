@@ -63,7 +63,7 @@ void SpriteRenderComponent::notify(IEvent* e) {
 			if (c->m_gameObjectID == gameObjectID)
 			{
 				int id = gameObjectID.back() - '0' - 1;
-				m_sprite.setColor(ZombieColors::Colors[id]);
+				m_sprite.setColor(PlayerColors::Colors[id]);
 			}
 		}
 	}

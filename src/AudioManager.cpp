@@ -12,7 +12,7 @@ void AudioManager::Init()
 {
 	addMusic("Nonstop.ogg", StaticStrings::MenuMusic);
 	setLoopById(StaticStrings::MenuMusic, true);
-	setVolumeById(StaticStrings::MenuMusic, 20);
+	setVolumeById(StaticStrings::MenuMusic, 70);
 
 	addMusic("Exit_the_Premises.ogg", StaticStrings::MainMusic);
 	addSound("car-crash.ogg", StaticStrings::MainCrash);
@@ -25,7 +25,7 @@ void AudioManager::Init()
 	addSound("race_countdown.ogg", StaticStrings::MainCountdown);
 	addSound("metall_grind.ogg", StaticStrings::MainMetallGrind);
 	setLoopById(StaticStrings::MainMusic, true);
-	setVolumeById(StaticStrings::MainMusic, 20);
+	setVolumeById(StaticStrings::MainMusic, 70);
 	setVolumeById(StaticStrings::MainIgnition, 60);
 }
 void AudioManager::PlayAudioById(std::string id)

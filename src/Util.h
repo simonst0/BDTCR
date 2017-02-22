@@ -146,13 +146,18 @@ public:
 	static const string MainMetallGrind;
 };
 
-static class ZombieColors {
+static class PlayerColors {
 public:
-	static const sf::Color ZombieColorPlayer1;
-	static const sf::Color ZombieColorPlayer2;
-	static const sf::Color ZombieColorPlayer3;
-	static const sf::Color ZombieColorPlayer4;
+	static const sf::Color PlayerColor1;
+	static const sf::Color PlayerColor2;
+	static const sf::Color PlayerColor3;
+	static const sf::Color PlayerColor4;
+	static const sf::Color PlayerColorOpaque1;
+	static const sf::Color PlayerColorOpaque2;
+	static const sf::Color PlayerColorOpaque3;
+	static const sf::Color PlayerColorOpaque4;
 
 	static sf::Color Colors[4];
+	static sf::Color ColorsOpaque[4];
 };
 

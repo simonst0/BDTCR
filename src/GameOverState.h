@@ -26,6 +26,7 @@ private:
 	void BindInput() override;
 	void UnbindInput() override;
 
+	void InitScoreLabels();
 	void InitButtons();
 	void SetButtonFocus();
 	void SetButtonTexts();
@@ -39,6 +40,7 @@ private:
 	tgui::Layout2d m_standardButtonSize;
 	tgui::Layout2d m_focusedButtonSize;
 	std::map<int, tgui::Button::Ptr> m_buttons;
+	std::map<int, tgui::Label::Ptr> m_scores;
 	const std::string m_buttonNextRound = "next round";
 	const std::string m_buttonNewGame = "new game";
 	const std::string m_buttonMenu = "back to menu";

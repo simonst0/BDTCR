@@ -71,8 +71,14 @@ const string StaticStrings::MainCountdown = "mainCountdown";
 const string StaticStrings::MainMetallGrind = "mainMetallGrind";
 
 
-const sf::Color ZombieColors::ZombieColorPlayer1 = sf::Color(47, 149, 208, 100);
-const sf::Color ZombieColors::ZombieColorPlayer2 = sf::Color(232, 106, 23, 100);
-const sf::Color ZombieColors::ZombieColorPlayer3 = sf::Color(57, 194, 114, 100);
-const sf::Color ZombieColors::ZombieColorPlayer4 = sf::Color(255, 204, 0, 100);
-sf::Color ZombieColors::Colors[4] = { ZombieColors::ZombieColorPlayer1, ZombieColors::ZombieColorPlayer2 ,ZombieColors::ZombieColorPlayer3, ZombieColors::ZombieColorPlayer4 };
+const sf::Color PlayerColors::PlayerColor1 = sf::Color(47, 149, 208, 100);
+const sf::Color PlayerColors::PlayerColor2 = sf::Color(232, 106, 23, 100);
+const sf::Color PlayerColors::PlayerColor3 = sf::Color(57, 194, 114, 100);
+const sf::Color PlayerColors::PlayerColor4 = sf::Color(255, 204, 0, 100);
+sf::Color PlayerColors::Colors[4] = { PlayerColors::PlayerColor1, PlayerColors::PlayerColor2 ,PlayerColors::PlayerColor3, PlayerColors::PlayerColor4 };
+
+const sf::Color PlayerColors::PlayerColorOpaque1 = sf::Color(47, 149, 208, 255);
+const sf::Color PlayerColors::PlayerColorOpaque2 = sf::Color(232, 106, 23, 255);
+const sf::Color PlayerColors::PlayerColorOpaque3 = sf::Color(57, 194, 114, 255);
+const sf::Color PlayerColors::PlayerColorOpaque4 = sf::Color(255, 204, 0, 255);
+sf::Color PlayerColors::ColorsOpaque[4] = { PlayerColors::PlayerColorOpaque1, PlayerColors::PlayerColorOpaque2 ,PlayerColors::PlayerColorOpaque3, PlayerColors::PlayerColorOpaque4 };

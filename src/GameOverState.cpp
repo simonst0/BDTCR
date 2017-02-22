@@ -27,6 +27,7 @@ unsigned arraysize(const T(&v)[S]) { return S; }
 GameOverState::GameOverState(GameStateManager* gameStateManager, Game* game, std::string id) : GameState(gameStateManager, game, id)
 {
 	InitButtons();
+	InitScoreLabels();
 }
 
 GameOverState::~GameOverState()
@@ -58,26 +59,14 @@ void GameOverState::VInit()
 	m_gameObjectList.push_back(move(text));
 
 	auto scores = GameObjectManager::GetInstance().GetPlayerScores();
-	string scoreText = "";
 
+	int i = 0;
 	for (auto score : scores)
 	{
-		scoreText += score.first + " - " + to_string(score.second) + " Points\n";
+		m_scores[i]->setText(score.first + " - " + to_string(score.second) + " Points\n");
+		Game::GUI.add(m_scores[i], "score");
+		i++;
 	}
-
-	text = make_unique<GameObject>("GameOverText");
-	renderComp = make_unique<TextComponent>(*text,
-		m_game->getWindow(),
-		StaticStrings::ResourcePathFonts + StaticStrings::TextFont,
-		scoreText,
-		Vector2f(position.x, position.y - 100),
-		35);
-
-	RenderManager::getInstance().Bind(text->GetId(), 0, renderComp.get());
-	text->AddComponent(move(renderComp));
-
-	m_isInit |= text->Init();
-	m_gameObjectList.push_back(move(text));
 
 	m_view = m_game->getWindow().getView();
 	BindInput();
@@ -101,6 +90,25 @@ void GameOverState::VInit()
 	}
 }
 
+void GameOverState::InitScoreLabels()
+{
+	auto position = sf::Vector2f(tgui::bindWidth(Game::GUI).getValue() * 3 / 8, tgui::bindHeight(Game::GUI).getValue() * 3 / 8);
+	float padding = 40;
+
+	for (int i = 0; i < 4; i++)
+	{
+		auto score = std::make_shared<tgui::Label>();
+		score = std::make_shared<tgui::Label>();
+		score->setFont(StaticStrings::ResourcePathFonts + StaticStrings::TextFont);
+		score->setTextColor(PlayerColors::ColorsOpaque[i]);
+		score->setOpacity(1);
+		score->setTextSize(35);
+		score->setAutoSize(true);
+		score->setPosition(position.x, position.y + i * padding);
+		m_scores[i] = score;
+	}
+}
+
 void GameOverState::InitButtons()
 {
 	auto theme = make_shared<tgui::Theme>(StaticStrings::ResourcePathGui + StaticStrings::GuiTheme);
@@ -115,7 +123,6 @@ void GameOverState::InitButtons()
 	for (int i = 0; i < arraysize(m_usedButtonTexts); i++)
 	{
 		tgui::Button::Ptr button = theme->load(StaticStrings::GuiButton);
-		//button->setText(m_usedButtonTexts[i]);
 		button->setFont(StaticStrings::ResourcePathFonts + StaticStrings::TextFont);
 		button->setTextSize(55);
 		button->connect("SizeChanged", [&](tgui::Button::Ptr button, tgui::Layout2d focusedButtonSize)
@@ -194,6 +201,9 @@ void GameOverState::VExit()
 	{
 		Game::GUI.remove(button.second);
 	}
+
+	while(Game::GUI.get("score"))
+		Game::GUI.remove(Game::GUI.get("score"));
 }
 
 void GameOverState::BindInput()

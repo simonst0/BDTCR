@@ -52,16 +52,22 @@ void ViewManager::RegisterBodyByID(std::string id)
 }
 sf::Vector2f ViewManager::GetMiddle()
 {
-	sf::Vector2f mid; mid.x = 0; mid.y = 0;
+	sf::Vector2f mid;
+	float maxX = -FLT_MAX;
+	float maxY = -FLT_MAX;
+	float minY = FLT_MAX;
+	float minX = FLT_MAX;
 	for (auto body : m_registeredBodies)
 	{
 		b2Vec2 bodyPosition = body->GetPosition();
-		mid.x += bodyPosition.x;
-		mid.y += bodyPosition.y;
+		maxX = std::max(maxX, bodyPosition.x);
+		minX = std::min(minX, bodyPosition.x);
+		maxY = std::max(maxY, bodyPosition.y);
+		minY = std::min(minY, bodyPosition.y);
 	}
-	mid.x /= m_bodyCount;
-	mid.y /= m_bodyCount;
-	return mid*100.0f;
+	mid.x = maxX + minX;
+	mid.y = maxY + minY;
+	return mid*50.0f;
 }
 void ViewManager::Clear()
 {
@@ -87,5 +93,5 @@ float ViewManager::GetZoom(sf::Vector2f middle)
 		float actRadius = midToPos.Length();
 		radius = std::max<float>(actRadius, radius);
 	}
-	return (radius / 1250)*(radius / 1250) + 0.05f;
+	return min((radius / 1250)*(radius / 1250) + 0.05f, 3.0f);
 }
